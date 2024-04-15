@@ -3,6 +3,8 @@ const dbConnection = require('../dbconnection');
 const cors = require('cors');
 
 const app = express();
+
+const router = express.Router()
 const port = 3000;
 const createdOn = new Date();
 const IsActive = 1;
@@ -13,7 +15,7 @@ app.use(express.json());
 app.use(cors());
 
 // Add API
-app.post('/country/AddCountry', (req, res) => {
+router.post('/AddCountry', (req, res) => {
     const { countryname, countrycode } = req.body;
     if (!countryname || !countrycode) {
         res.status(400)({ error: 'All Feilds are required' });
@@ -32,7 +34,7 @@ app.post('/country/AddCountry', (req, res) => {
 });
 
 // Update API
-app.put('/country/UpdateCountryById', (req, res) => {
+router.put('/UpdateCountryById', (req, res) => {
     const id = req.query.id;
     const { countryname, countrycode } = req.body;
 
@@ -57,7 +59,7 @@ app.put('/country/UpdateCountryById', (req, res) => {
 })
 
 // Delete API
-app.delete('/country/DeleteCountryById', (req, res) => {
+router.delete('/DeleteCountryById', (req, res) => {
     const id = req.query.id;
 
     if (!id) {
@@ -80,7 +82,7 @@ app.delete('/country/DeleteCountryById', (req, res) => {
 })
 
 // Get by ID API
-app.get('/country/GetCountryById', (req, res) => {
+router.get('/GetCountryById', (req, res) => {
     const id = req.query.id;
 
     if (!id) {
@@ -102,7 +104,7 @@ app.get('/country/GetCountryById', (req, res) => {
     })
 })
 // Get all records API
-app.get('/country/GetAllCountry', (req, res) => {
+router.get('/GetAllCountry', (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const orderBy = req.query.orderBy || 'createdOn';
@@ -125,6 +127,8 @@ app.get('/country/GetAllCountry', (req, res) => {
         }
     })
 })
-app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
-});
+// app.listen(port, () => {
+//     console.log(`Server is listening on port ${port}`);
+// });
+
+module.exports = router;

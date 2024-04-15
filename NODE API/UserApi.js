@@ -1,9 +1,11 @@
 const express = require('express');
+const router = express.Router();
 const dbConnection = require('../dbconnection');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
+const upload = require('./multerConfig');
 
 const app = express();
 const port = 3000;
@@ -13,6 +15,7 @@ const IsActive = 1;
 
 app.use(express.json());
 app.use(cors());
+
 // WELCOME EMAIL TO USER
 const transporter = nodemailer.createTransport({
     service: 'Gmail',
@@ -94,8 +97,7 @@ function welcomeEmail(username, email, res) {
                 </div>
             </div>
         </body>
-        </html>
-        `
+        </html>  `
     };
 
     transporter.sendMail(mailOptions, function (error, info) {
@@ -108,8 +110,9 @@ function welcomeEmail(username, email, res) {
         }
     });
 }
+
 // ADD USER API
-app.post('/user/adduser', (req, res) => {
+router.post('/adduser', (req, res) => {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
         res.status(400).json({ error: 'ALL Fields are required' });
@@ -137,7 +140,7 @@ app.post('/user/adduser', (req, res) => {
 });
 
 // GET ALL USER 
-app.get('/user/getalluser', (req, res) => {
+router.get('/getalluser', (req, res) => {
     const page = parseInt(req.body.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const orderBy = req.query.orderBy || 'createdOn';
@@ -161,7 +164,7 @@ app.get('/user/getalluser', (req, res) => {
 });
 
 // GET USER BY ID
-app.get('/user/userbyid', (req, res) => {
+router.get('/userbyid', (req, res) => {
     const id = req.query.id;
     if (!id) {
         res.status(400).json({ error: "ID IS REQUIRED" });
@@ -183,7 +186,7 @@ app.get('/user/userbyid', (req, res) => {
 })
 
 // UPDATE USER
-app.put('/user/updateuser', (req, res) => {
+router.put('/updateuser', (req, res) => {
     const id = req.query.id;
     const modifiedOn = new Date();
     const { username, email, password } = req.body;
@@ -214,7 +217,7 @@ app.put('/user/updateuser', (req, res) => {
 });
 
 // Delete USER
-app.delete('/user/deleteuser', (req, res) => {
+router.delete('/deleteuser', (req, res) => {
     const id = req.query.id;
     if (!id) {
         res.status(400).json({ error: 'Id is required' });
@@ -235,96 +238,23 @@ app.delete('/user/deleteuser', (req, res) => {
     });
 });
 
-// USER AUTHICATION
-app.post('/user/login', (req, res) => {
-    const { username, password } = req.body;
+// ADD USER PROFILE PIC
+router.post('/profilepic', upload.single('profilepic'), (req, res) => {
+    const userId = req.query.id;
+    const profilePicPath = req.file.path;
 
-    if (!username) {
-        return res.status(400).json({ error: 'Username is required' });
-    }
-
-    dbConnection.query('SELECT * FROM users WHERE username = ?', [username], function (err, result) {
+    dbConnection.query('UPDATE users SET profilepic = ? WHERE id = ?', [profilePicPath, userId], function (err, result) {
         if (err) {
-            console.error("Error:", err);
-            return res.status(500).json({ error: 'Internal Server Error' });
+            console.error("error Upting profile pic");
+            res.status(500).json({ error: 'internal server error' })
         }
-
-        if (result.length === 0) {
-            return res.status(404).json({ error: 'You are not registered' });
+        else {
+            res.status(200).json({ message: 'Profile Picture Add Successfully' })
         }
-
-        const user = result[0];
-
-        // Compare passwords
-        bcrypt.compare(password, user.password, function (err, passwordMatch) {
-            if (err) {
-                console.error("Error:", err);
-                return res.status(500).json({ error: 'Internal Server Error' });
-            }
-
-            if (!passwordMatch) {
-                return res.status(401).json({ error: 'Wrong password' });
-            }
-
-            // Passwords match, generate JWT token
-            const token = jwt.sign({ userId: user.id, username: user.username }, 'your_secret_key', { expiresIn: '1h' });
-
-            // Send token to the client
-            res.status(200).json({ message: 'Login successful', token });
-        });
     });
 });
 
-// MODIFI PASSWORD
-app.put('/user/modifyPassword', (req, res) => {
-    const { username, currentPassword, newPassword } = req.body;
-    if (!username || !currentPassword || !newPassword) {
-        res.status(400).json({ error: "All fileds are required" });
-        return;
-    }
-    dbConnection.query("SELECT * FROM users WHERE username = ?", [username], function (err, result) {
-        if (err) {
-            console.error("error", err);
-            res.status(500).json({ error: 'Internal server error' });
-            return;
-        }
-
-        // IF USER DOES NOT EXITS
-        if (result.length === 0) {
-            return res.status(404).json({ error: "Uesr not found" });
-        }
-
-        const user = result[0];
-
-        bcrypt.compare(currentPassword, user.password, function (err, passwordMatch) {
-            if (err) {
-                console.error("error", err);
-                return res.status(500).json({ error: 'Internal server error' });
-            }
-
-            if (!passwordMatch) {
-                return res.status(401).json({ error: 'Password is not match' });
-            }
-
-            // HASH NEW PASSWORD
-            bcrypt.hash(newPassword, 10, function (err, hashedPassword) {
-                if (err) {
-                    console.error("error", err);
-                    return res.status(500).json({ error: 'Internal server error' });
-                }
-
-                dbConnection.query("UPDATE users SET password = ? WHERE id = ?", [hashedPassword, user.id], function (err, result) {
-                    if (err) {
-                        console.error("error", err);
-                        return res.status(500).json({ error: 'Internal server error' });
-                    }
-
-                    return res.status(200).json({ message: "Password Updated Successfully", result });
-                });
-            });
-        });
-    });
-});
-app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
-});
+module.exports = router;
+// app.listen(port, () => {
+//     console.log(`Server is listening on port ${port}`);
+// });

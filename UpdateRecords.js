@@ -1,7 +1,7 @@
 const dbConnection = require('./dbconnection');
 
 function updateRecord(callback) {
-    dbConnection.query("UPDATE country SET population = 1000000 WHERE name = 'Example Country'", function (err, result) {
+    dbConnection.query("UPDATE country SET countryname = shrilanka WHERE name = 'Canada'", function (err, result) {
         if (err) {
             callback(err, null);
         } else {
