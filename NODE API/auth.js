@@ -130,10 +130,20 @@ router.post('/forgetpassword', (req, res) => {
             }
 
             const tokenExpiry = Date.now() + 3600000;   //1 hour
+            const timestamp = tokenExpiry // Your millisecond value
+
+            // Create a new Date object using the millisecond value
+            const date = new Date(timestamp);
+
+            // Format the date to 'YYYY-MM-DD HH:MM:SS'
+            const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+
+            // console.log(formattedDate); // Output: '2024-04-22 13:50:54'
+
 
             dbConnection.query(
                 'UPDATE users SET reset_token = ?, reset_token_expiry = ? where email = ?',
-                [token, tokenExpiry, email], (err) => {
+                [token, formattedDate, email], (err) => {
                     if (err) {
                         console.error("error", err);
                         return res.status(500).json({ error: 'internal server error' });

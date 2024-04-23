@@ -11,13 +11,16 @@ const userApiRouter = require('./UserApi');
 const authApiRouter = require('./auth');
 const countryApiRouter = require('./CountryApi');
 const cityApiRouter = require('./CityApi');
-
+const coustomerApiRouter = require('./CustomerApi');
+const salesApiRouter = require('./SalesApi');
 
 // Use the routes 
 app.use('/user', userApiRouter);
 app.use('/auth', authApiRouter);
 app.use('/country', countryApiRouter);
 app.use('/city', cityApiRouter);
+app.use('/customer', coustomerApiRouter);
+app.use('/sales', salesApiRouter);
 
 
 app.listen(port, () => {

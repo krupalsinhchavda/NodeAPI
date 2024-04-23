@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { v4: uuidv4 } = require('uuid'); // Import UUID module and its v4 method
 
 // Function to create Folder if not exits
 function CreateDirectory(directory) {
@@ -11,8 +12,16 @@ function CreateDirectory(directory) {
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const userid = req.query.id;
-        const userFolder = path.join('uploads/profiles', userid);
+        const userId = uuidv4();
+
+        // Adjust the path based on the type of upload
+        let uploadFolder;
+        if (req.url.includes('sales')) {
+            uploadFolder = 'uploads/salesman';
+        } else {
+            uploadFolder = 'uploads/profiles';
+        }
+        const userFolder = path.join(uploadFolder, userId);
 
         // Create the user folder if it doesn't exist
         CreateDirectory(userFolder);
@@ -20,8 +29,7 @@ const storage = multer.diskStorage({
         cb(null, userFolder);
     },
     filename: function (req, file, cb) {
-        const userId = req.query.id;
-        const uniqueFilename = `${userId}-${Date.now()}${path.extname(file.originalname)}`;
+        const uniqueFilename = `${Date.now()}${path.extname(file.originalname)}`;
         cb(null, uniqueFilename);
     }
 });
@@ -35,27 +43,6 @@ const upload = multer({
             cb(new Error('Only image files are allowed!'), false);
         }
     }
-})
-// // Multer storage configuration
-// const storage = multer.diskStorage({
-//     destination: function (req, file, cb) {
-//         cb(null, 'uploads/profiles'); // Directory where profile pictures will be stored
-//     },
-//     filename: function (req, file, cb) {
-//         cb(null, 'profile-' + Date.now() + path.extname(file.originalname)); // Unique filename for the uploaded picture
-//     }
-// });
-
-// // Multer file filter to restrict uploads to image files only
-// const fileFilter = function (req, file, cb) {
-//     if (file.mimetype.startsWith('image/')) {
-//         cb(null, true);
-//     } else {
-//         cb(new Error('Only image files are allowed!'), false);
-//     }
-// };
-
-// Multer upload instance
-// const upload = multer({ storage: storage, fileFilter: fileFilter });
+});
 
 module.exports = upload;

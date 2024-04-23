@@ -101,8 +101,9 @@ router.get('/GetCountryById', (req, res) => {
         else {
             res.status(200).json({ message: ' Get Record successfully', Data: result[0] })
         }
-    })
-})
+    });
+});
+
 // Get all records API
 router.get('/GetAllCountry', (req, res) => {
     const page = parseInt(req.query.page) || 1;
@@ -112,21 +113,67 @@ router.get('/GetAllCountry', (req, res) => {
 
     const offset = (page - 1) * limit;
 
-    const sqlquery = `select * from country order by ${orderBy} ${orderDirection} limit ${limit} offset ${offset}`;
-    dbConnection.query(sqlquery, function (err, result) {
+    let query = "SELECT * FROM country";
+    const queryParams = [];
+
+    // where and filter structure
+    const filterParams = req.query;
+    const whereClauses = [];
+
+    for (const [key, value] of Object.entries(filterParams)) {
+        if (key !== 'page' && key !== 'limit' && key !== 'orderBy' && key !== 'orderDirection') {
+            whereClauses.push(`${key} LIKE ?`);
+            queryParams.push(`%${value}%`);
+        }
+    }
+
+    // Add WHERE clause to query if there are any filters
+    if (whereClauses.length > 0) {
+        query += ` WHERE ${whereClauses.join(' AND ')}`;
+    }
+
+    // Add ORDER BY and LIMIT clauses
+    query += ` ORDER BY ${orderBy} ${orderDirection} LIMIT ?, ?`;
+
+    queryParams.push(offset, limit);
+
+    dbConnection.query(query, queryParams, (err, result) => {
         if (err) {
             console.error("Error", err);
-            res.status(500).json({ error: 'internal server error' });
+            res.status(500).json({ error: 'Internal Server Error' });
             return;
         }
-        if (result.affectedRows === 0) {
-            res.status(404).json({ error: 'records not found' })
+
+        if (result.lenght === 0) {
+            res.status(404).json({ error: 'Recored Not Found' })
         }
-        else {
-            res.status(200).json({ message: 'Get Record successfully', Data: result });
-        }
-    })
-})
+
+        // Execute query to retrieve the total count of records in the table
+        dbConnection.query("SELECT COUNT(*) AS total FROM country", function (err, totalCountResult) {
+            if (err) {
+                console.error("Error", err);
+                res.status(500).json({ error: 'Internal Server Error' });
+                return;
+            }
+            
+            if (result.lenght === 0) {
+                res.status(404).json({ error: 'Recored Not Found' })
+            }
+            const total = totalCountResult[0].total; // Retrieve the total count from the result
+            const totalPages = Math.ceil(total / limit); // Calculate total pages
+
+            res.status(200).json({
+                message: 'Get Record successfully',
+                data: result,
+                page: page,
+                limit: limit,
+                total: total,
+                totalPages: totalPages
+            });
+        });
+    });
+});
+
 // app.listen(port, () => {
 //     console.log(`Server is listening on port ${port}`);
 // });
