@@ -135,12 +135,33 @@ router.get('/GetSalesmanById', (req, res) => {
             res.status(500).json({ error: 'Internal server error' });
             return;
         }
-         if (result.length === 0) {
+        if (result.length === 0) {
             res.status(404).json({ error: 'Record not found' });
         }
         else {
             res.status(200).json({ message: ' Get Record successfully', Data: result[0] })
         }
     })
-})
+});
+
+//Delete Salesman
+router.delete('/DeleteSalesman', (req, res) => {
+    const salesmanid = req.query.salesmanId;
+    if (!salesmanid) {
+        return res.status(400).json({ error: 'Salesman Id is required' });
+    }
+    dbConnection.query('DELETE FROM salesman WHERE SalesmanID = ?', salesmanid, function (err, result) {
+        if (err) {
+            console.error("Error:", err);
+            res.status(500).json({ error: 'Internal server error' });
+            return;
+        }
+        if (result.affectedRows === 0) {
+            res.status(404).json({ error: 'Rocord not found' });
+        }
+        else {
+            res.status(200).json({ message: 'Record successfully deleted' });
+        }
+    });
+});
 module.exports = router;

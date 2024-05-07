@@ -18,7 +18,7 @@ app.use(cors());
 router.post('/AddCountry', (req, res) => {
     const { countryname, countrycode } = req.body;
     if (!countryname || !countrycode) {
-        res.status(400)({ error: 'All Feilds are required' });
+        res.status(400).json({ error: 'All Feilds are required' });
         return;
     }
 

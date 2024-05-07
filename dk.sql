@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 16, 2024 at 07:07 PM
+-- Generation Time: Apr 27, 2024 at 06:32 AM
 -- Server version: 10.4.11-MariaDB
 -- PHP Version: 7.3.13
 
@@ -19,8 +19,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `dk`
---
+-- Database: `dk`;
 
 -- --------------------------------------------------------
 
@@ -95,7 +94,7 @@ CREATE TABLE `customers` (
 INSERT INTO `customers` (`name`, `address`) VALUES
 ('Company Inc', 'Highway 37'),
 ('John', 'Highway 71'),
-('Peter', 'Lowstreet 4'),
+('Drashti', 'Ahmedabad'),
 ('Amy', 'Apple st 652'),
 ('Hannah', 'Mountain 21'),
 ('Michael', 'Valley 345'),
@@ -107,7 +106,39 @@ INSERT INTO `customers` (`name`, `address`) VALUES
 ('Ben', 'Park Lane 38'),
 ('William', 'Central st 954'),
 ('Chuck', 'Main Road 989'),
-('Viola', 'Sideway 1633');
+('Viola', 'Sideway 1633'),
+('krupalsinh', 'Ahmedabad'),
+(NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `salesman`
+--
+
+CREATE TABLE `salesman` (
+  `SalesmanID` int(11) NOT NULL,
+  `FirstName` varchar(50) DEFAULT NULL,
+  `LastName` varchar(50) DEFAULT NULL,
+  `Email` varchar(100) DEFAULT NULL,
+  `Phone` varchar(20) DEFAULT NULL,
+  `ProfileImg` varchar(255) DEFAULT NULL,
+  `Address` varchar(255) DEFAULT NULL,
+  `CityID` int(11) DEFAULT NULL,
+  `State` char(2) DEFAULT NULL,
+  `ZipCode` varchar(20) DEFAULT NULL,
+  `HireDate` date DEFAULT NULL,
+  `Commission` decimal(10,2) DEFAULT NULL,
+  `CreatedOn` datetime DEFAULT NULL,
+  `ModifiedOn` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `salesman`
+--
+
+INSERT INTO `salesman` (`SalesmanID`, `FirstName`, `LastName`, `Email`, `Phone`, `ProfileImg`, `Address`, `CityID`, `State`, `ZipCode`, `HireDate`, `Commission`, `CreatedOn`, `ModifiedOn`) VALUES
+(1, 'krupalsinh', 'chavda', 'krupalsinhchavda36143@gmail.com', '7600230620', 'uploads\\salesman\\075a686a-dc9b-4dae-a571-0c487f95376c\\1713696661397.jpg', 'Ahmedabad', 5, 'Gu', '382330', '2023-12-11', '18000.00', '2024-04-21 15:29:26', '2024-04-21 16:21:01');
 
 -- --------------------------------------------------------
 
@@ -125,7 +156,7 @@ CREATE TABLE `users` (
   `createdOn` date DEFAULT NULL,
   `profilepic` varchar(255) DEFAULT NULL,
   `reset_token` varchar(255) DEFAULT NULL,
-  `reset_token_expiry` bigint(20) DEFAULT NULL
+  `reset_token_expiry` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -133,8 +164,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `IsActive`, `modifiedOn`, `createdOn`, `profilepic`, `reset_token`, `reset_token_expiry`) VALUES
-(1, 'Krupalsinh', 'krupalsinhchavda36143@gmail.com', '$2a$10$7blwGLJ7wRPrbZyTMrKuGOe2zyIcFyjZxM9Ah1K47RwimIBx6B2le', 1, NULL, '2024-04-10', 'uploads\\profiles\\1\\1-1712902419142.jpg', NULL, NULL),
-(2, 'Drashtiji', 'drashtivaishnani25@gmail.com', '$2a$10$TGHMRnjm21YVPQLZ.gNlWuKlFyI8R0GdkKBgE0v7sgz4.2gJUulme', 1, NULL, '2024-04-10', NULL, '$2a$10$sP.ixo1vr6eNeVULLtjvEueluPL3V.3O3HuqB55oJxYdgJcWrqo7O', 1713008563611);
+(1, 'Krupalsinh', 'krupalsinhchavda36143@gmail.com', '$2a$10$7blwGLJ7wRPrbZyTMrKuGOe2zyIcFyjZxM9Ah1K47RwimIBx6B2le', 1, NULL, '2024-04-10', 'uploads\\profiles\\d3904c42-4595-410c-b4bf-636c89103869\\1713691622577.jpg', NULL, NULL),
+(2, 'Drashtiji', 'drashtivaishnani25@gmail.com', '$2a$10$rnrNoZ28wBH7kYVgTypyneg1dk96FLOPixOkJdZusfNigkd8OLepO', 1, NULL, '2024-04-10', NULL, NULL, NULL),
+(3, 'Divayraj', 'divyarajsnihsisodiya@gmail.com', '$2a$10$v839yZOKYyFT5lW2oz4HEe15mPSOW5GDGJY/vsg2/ovrozNOw0FiK', 1, NULL, '2024-04-22', NULL, '$2a$10$Qhs12kpvhMWbtc57idOCc.Eg05ZSQUTg9xmbvn8jyDDXJOlKUotRS', '2024-04-22 23:25:37');
 
 --
 -- Indexes for dumped tables
@@ -152,6 +184,13 @@ ALTER TABLE `city`
 --
 ALTER TABLE `country`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `salesman`
+--
+ALTER TABLE `salesman`
+  ADD PRIMARY KEY (`SalesmanID`),
+  ADD KEY `CityID` (`CityID`);
 
 --
 -- Indexes for table `users`
@@ -178,10 +217,16 @@ ALTER TABLE `country`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
+-- AUTO_INCREMENT for table `salesman`
+--
+ALTER TABLE `salesman`
+  MODIFY `SalesmanID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables
@@ -192,6 +237,12 @@ ALTER TABLE `users`
 --
 ALTER TABLE `city`
   ADD CONSTRAINT `city_ibfk_1` FOREIGN KEY (`countryId`) REFERENCES `country` (`id`);
+
+--
+-- Constraints for table `salesman`
+--
+ALTER TABLE `salesman`
+  ADD CONSTRAINT `salesman_ibfk_1` FOREIGN KEY (`CityID`) REFERENCES `city` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
